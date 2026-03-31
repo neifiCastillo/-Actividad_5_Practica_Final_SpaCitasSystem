@@ -49,17 +49,25 @@ public class CitaService : ICitaService
 
     public async Task AddAsync(CitaDto dto)
     {
-        var servicio = await _context.Servicios.FindAsync(dto.ServicioId);
+        if (dto.Fecha.Date < DateTime.Now.Date)
+            throw new Exception("No se puede registrar una cita en una fecha pasada");
 
+        var servicio = await _context.Servicios.FindAsync(dto.ServicioId);
         if (servicio == null)
             throw new Exception("Servicio no encontrado");
 
+        await ValidarPacienteDuplicado(
+            dto.PacienteId,
+            dto.Fecha,
+            dto.Hora
+        );
+
         await ValidarConflictoCita(
-        dto.TerapeutaId,
-        dto.Fecha,
-        dto.Hora,
-        servicio.DuracionMinutos
-    );
+            dto.TerapeutaId,
+            dto.Fecha,
+            dto.Hora,
+            servicio.DuracionMinutos
+        );
 
         var cita = new Cita
         {
@@ -73,7 +81,6 @@ public class CitaService : ICitaService
         await _context.Citas.AddAsync(cita);
         await _context.SaveChangesAsync();
     }
-
     public async Task UpdateAsync(CitaDto dto)
     {
         var cita = await _context.Citas.FindAsync(dto.Id);
@@ -81,25 +88,27 @@ public class CitaService : ICitaService
         if (cita == null)
             throw new Exception("La cita no existe");
 
+        if (dto.Fecha.Date < DateTime.Now.Date)
+            throw new Exception("No se puede registrar una cita en una fecha pasada");
+
         var servicio = await _context.Servicios.FindAsync(dto.ServicioId);
         if (servicio == null)
             throw new Exception("Servicio no encontrado");
 
-        var paciente = await _context.Pacientes.FindAsync(dto.PacienteId);
-        if (paciente == null)
-            throw new Exception("Paciente no encontrado");
-
-        var terapeuta = await _context.Terapeutas.FindAsync(dto.TerapeutaId);
-        if (terapeuta == null)
-            throw new Exception("Terapeuta no encontrado");
+        await ValidarPacienteDuplicado(
+            dto.PacienteId,
+            dto.Fecha,
+            dto.Hora,
+            dto.Id
+        );
 
         await ValidarConflictoCita(
-      dto.TerapeutaId,
-      dto.Fecha,
-      dto.Hora,
-      servicio.DuracionMinutos,
-      dto.Id 
-         );
+            dto.TerapeutaId,
+            dto.Fecha,
+            dto.Hora,
+            servicio.DuracionMinutos,
+            dto.Id
+        );
 
         cita.PacienteId = dto.PacienteId;
         cita.ServicioId = dto.ServicioId;
@@ -162,5 +171,35 @@ public class CitaService : ICitaService
 
         if (conflicto)
             throw new Exception("El terapeuta ya tiene una cita en ese horario");
+    }
+    private async Task ValidarPacienteDuplicado(
+      int pacienteId,
+      DateTime fecha,
+      TimeSpan hora,
+      int? citaId = null)
+    {
+        var citas = await _context.Citas
+            .Include(c => c.Servicio)
+            .Where(c => c.PacienteId == pacienteId &&
+                        c.Fecha.Date == fecha.Date)
+            .ToListAsync();
+
+        var horaNueva = hora.Hours;
+
+        var conflicto = citas.Any(c =>
+        {
+            if (citaId.HasValue && c.Id == citaId.Value)
+                return false;
+
+            var estado = CalcularEstado(c);
+
+            if (estado != "Vigente" && estado != "En proceso")
+                return false;
+
+            return c.Hora.Hours == horaNueva;
+        });
+
+        if (conflicto)
+            throw new Exception("El paciente ya tiene una cita en esa hora");
     }
 }

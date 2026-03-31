@@ -25,7 +25,6 @@ namespace SpaCitasSystem.Shared.Export
 
             var sb = new StringBuilder();
 
-            // Headers
             for (int i = 0; i < dgv.Columns.Count; i++)
             {
                 sb.Append(dgv.Columns[i].HeaderText);
@@ -76,7 +75,6 @@ namespace SpaCitasSystem.Shared.Export
             {
                 Table table = new Table(dgv.Columns.Count);
 
-                // Headers
                 foreach (DataGridViewColumn column in dgv.Columns)
                 {
                     table.AddHeaderCell(column.HeaderText);
