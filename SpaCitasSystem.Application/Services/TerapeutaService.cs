@@ -23,6 +23,32 @@ public class TerapeutaService
         if (string.IsNullOrWhiteSpace(dto.Especialidad))
             throw new Exception("La especialidad es obligatoria");
 
+        var terapeutas = await _repo.GetAllAsync();
+
+        var existe = terapeutas.Any(t =>
+            t.Nombre.ToLower().Trim() == dto.Nombre.ToLower().Trim() &&
+            t.Especialidad.ToLower().Trim() == dto.Especialidad.ToLower().Trim()
+        );
+
+        if (existe)
+            throw new Exception("Ya existe un terapeuta con ese nombre y especialidad");
+
         await base.AddAsync(dto);
+    }
+
+    public override async Task UpdateAsync(TerapeutaDto dto)
+    {
+        var terapeutas = await _repo.GetAllAsync();
+
+        var existe = terapeutas.Any(t =>
+            t.Id != dto.Id &&
+            t.Nombre.ToLower().Trim() == dto.Nombre.ToLower().Trim() &&
+            t.Especialidad.ToLower().Trim() == dto.Especialidad.ToLower().Trim()
+        );
+
+        if (existe)
+            throw new Exception("Ya existe otro terapeuta con ese nombre y especialidad");
+
+        await base.UpdateAsync(dto);
     }
 }

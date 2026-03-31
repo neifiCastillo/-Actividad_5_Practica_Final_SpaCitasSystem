@@ -38,7 +38,18 @@ namespace SpaCitasSystem.Application.Common
 
         public virtual async Task UpdateAsync(TDto dto)
         {
-            var entity = _mapper.Map<TEntity>(dto);
+            var idProperty = typeof(TDto).GetProperty("Id");
+
+            if (idProperty == null)
+                throw new Exception("El DTO no tiene propiedad Id");
+
+            var id = (int)idProperty.GetValue(dto);
+            var entity = await _repo.GetByIdAsync(id);
+
+            if (entity == null)
+                throw new Exception("Registro no encontrado");
+            _mapper.Map(dto, entity);
+
             await _repo.UpdateAsync(entity);
         }
 
