@@ -12,10 +12,22 @@ namespace SpaCitasSystem.Application.Services
         {
             _usuarioRepo = usuarioRepo;
         }
-
         public async Task CrearUsuarioAsync(Usuario usuario)
         {
+            var usuarios = await _usuarioRepo.GetAllAsync();
+
+            var existe = usuarios.Any(u => u.Username.ToLower() == usuario.Username.ToLower());
+
+            if (existe)
+                throw new Exception("El usuario ya existe");
+
+            usuario.PasswordHash = HashPassword(usuario.PasswordHash);
+
             await _usuarioRepo.AddAsync(usuario);
+        }
+        private string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }
 }

@@ -15,11 +15,19 @@ namespace SpaCitasSystem.WinForms
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
+                    string.IsNullOrWhiteSpace(txtUsername.Text) ||
+                    string.IsNullOrWhiteSpace(txtPassword.Text))
+                {
+                    MessageBox.Show("Todos los campos son obligatorios");
+                    return;
+                }
+
                 Usuario usuario = new Usuario
                 {
-                    Nombre = txtNombre.Text,
-                    Username = txtUsername.Text,
-                    PasswordHash = txtPassword.Text,
+                    Nombre = txtNombre.Text.Trim(),
+                    Username = txtUsername.Text.Trim(),
+                    PasswordHash = txtPassword.Text, 
                     Activo = true
                 };
 

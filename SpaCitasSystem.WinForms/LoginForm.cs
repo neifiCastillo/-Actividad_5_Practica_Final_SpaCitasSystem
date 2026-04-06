@@ -7,7 +7,6 @@ namespace SpaCitasSystem.WinForms
     {
         private readonly IAuthService _authService;
         private readonly IServiceProvider _serviceProvider;
-
         public LoginForm(IAuthService authService, IServiceProvider serviceProvider)
         {
             InitializeComponent();
@@ -24,7 +23,7 @@ namespace SpaCitasSystem.WinForms
 
                 if (success)
                 {
-                    MessageBox.Show("Login exitoso");
+                    //MessageBox.Show("Login exitoso");
                     var menu = _serviceProvider.GetRequiredService<MainMenuForm>();
                     menu.Show();
                     this.Hide();

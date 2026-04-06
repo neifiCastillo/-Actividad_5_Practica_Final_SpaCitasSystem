@@ -63,10 +63,20 @@ namespace SpaCitasSystem.WinForms.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap eraser {
+        internal static System.Drawing.Bitmap BACK {
             get {
-                object obj = ResourceManager.GetObject("eraser", resourceCulture);
+                object obj = ResourceManager.GetObject("BACK", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Logo {
+            get {
+                object obj = ResourceManager.GetObject("Logo", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

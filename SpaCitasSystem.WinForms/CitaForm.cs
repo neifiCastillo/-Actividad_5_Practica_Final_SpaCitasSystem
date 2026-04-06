@@ -304,7 +304,7 @@ namespace SpaCitasSystem.WinForms
         }
         private void btnExportPdf_Click(object sender, EventArgs e)
         {
-            ExportService.ExportToPdf(dgvCitas);
+            ExportService.ExportToPdf(dgvCitas, "Reporte de Citas");
         }
         private async void btnLimpiar_Click(object sender, EventArgs e)
         {

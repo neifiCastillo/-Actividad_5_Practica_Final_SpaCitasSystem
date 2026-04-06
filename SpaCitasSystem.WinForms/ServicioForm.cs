@@ -1,5 +1,4 @@
 ﻿using SpaCitasSystem.Application.Interfaces;
-using SpaCitasSystem.Application.Services;
 using SpaCitasSystem.Domain.DTOs;
 using SpaCitasSystem.Shared.Export;
 using SpaCitasSystem.Shared.Helpers;
@@ -9,7 +8,6 @@ namespace SpaCitasSystem.WinForms
     public partial class ServicioForm : Form
     {
         private readonly IServicioService _service;
-
         public ServicioForm(IServicioService service)
         {
             InitializeComponent();
@@ -123,7 +121,7 @@ namespace SpaCitasSystem.WinForms
                 MessageBox.Show(ex.Message);
             }
         }
-        private void dgvServicios_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvServicios_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (dgvServicios.CurrentRow == null) return;
 
@@ -147,7 +145,7 @@ namespace SpaCitasSystem.WinForms
         }
         private void btnExportPdf_Click(object sender, EventArgs e)
         {
-            ExportService.ExportToPdf(dgvServicios);
+            ExportService.ExportToPdf(dgvServicios, "Reporte de Servicios");
         }
         private void btnBorrar_Click(object sender, EventArgs e)
         {

@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using SpaCitasSystem.Application.Interfaces;
+﻿using SpaCitasSystem.Application.Interfaces;
 using SpaCitasSystem.Domain.DTOs;
 using SpaCitasSystem.Shared.Export;
 using SpaCitasSystem.Shared.Helpers;
@@ -9,7 +8,6 @@ namespace SpaCitasSystem.WinForms
     public partial class PacienteForm : Form
     {
         private readonly IPacienteService _pacienteService;
-
         public PacienteForm(IPacienteService pacienteService)
         {
             InitializeComponent();
@@ -17,9 +15,7 @@ namespace SpaCitasSystem.WinForms
         }
         private async void PacienteForm_Load(object sender, EventArgs e)
         {
-
             await LoadData();
-
         }
         private async Task LoadData()
         {
@@ -31,16 +27,12 @@ namespace SpaCitasSystem.WinForms
             dgvPacientes.ClearSelection();
             txtTelefono.TextChanged += txtTelefono_TextChanged;
         }
-
-        private void txtTelefono_TextChanged(object sender, EventArgs e)
+        private void txtTelefono_TextChanged(object? sender, EventArgs e)
         {
             var cursor = txtTelefono.SelectionStart;
-
             InputValidatorHelper.FormatearTelefonoRD(txtTelefono);
-
             txtTelefono.SelectionStart = txtTelefono.Text.Length;
         }
-
         private async void btnAgregar_Click(object sender, EventArgs e)
         {
             try
@@ -171,12 +163,10 @@ namespace SpaCitasSystem.WinForms
                 MessageBox.Show(ex.Message);
             }
         }
-        private void dgvPacientes_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvPacientes_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (dgvPacientes.CurrentRow == null) return;
-
             var dto = (PacienteDto)dgvPacientes.CurrentRow.DataBoundItem;
-
             txtNombre.Text = dto.Nombre;
             txtTelefono.Text = dto.Telefono;
             txtEmail.Text = dto.Email;
@@ -199,9 +189,8 @@ namespace SpaCitasSystem.WinForms
         }
         private void btnExportPdf_Click(object sender, EventArgs e)
         {
-            ExportService.ExportToPdf(dgvPacientes);
+            ExportService.ExportToPdf(dgvPacientes, "Reporte de Pacientes");
         }
-
         private void btnBorrar_Click(object sender, EventArgs e)
         {
             Limpiar();
