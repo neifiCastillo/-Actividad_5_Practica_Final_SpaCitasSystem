@@ -1,5 +1,11 @@
-﻿using iText.Kernel.Pdf;
+﻿using iText.IO.Font.Constants;
+using iText.IO.Image;
+using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using iText.Layout;
 using iText.Layout.Element;
+using iText.Layout.Properties;
 using System.Text;
 
 namespace SpaCitasSystem.Shared.Export
@@ -23,37 +29,42 @@ namespace SpaCitasSystem.Shared.Export
 
             if (sfd.ShowDialog() != DialogResult.OK) return;
 
+            var columnas = dgv.Columns
+                .Cast<DataGridViewColumn>()
+                .Where(c => c.Visible &&
+                            c.Name != "PacienteId" &&
+                            c.Name != "ServicioId" &&
+                            c.Name != "TerapeutaId")
+                .ToList();
+
             var sb = new StringBuilder();
 
-            for (int i = 0; i < dgv.Columns.Count; i++)
+            foreach (var col in columnas)
             {
-                sb.Append(dgv.Columns[i].HeaderText);
-                if (i < dgv.Columns.Count - 1)
-                    sb.Append(",");
+                sb.Append($"\"{col.HeaderText}\",");
             }
             sb.AppendLine();
 
-            // Rows
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 if (row.IsNewRow) continue;
 
-                for (int i = 0; i < dgv.Columns.Count; i++)
+                foreach (var col in columnas)
                 {
-                    sb.Append(row.Cells[i].Value?.ToString());
-                    if (i < dgv.Columns.Count - 1)
-                        sb.Append(",");
+                    var value = row.Cells[col.Name].Value?.ToString() ?? "";
+                    value = value.Replace("\"", "\"\"");
+                    sb.Append($"\"{value}\",");
                 }
+
                 sb.AppendLine();
             }
 
             File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
-
             MessageBox.Show("CSV exportado correctamente");
         }
 
         //PDF
-        public static void ExportToPdf(DataGridView dgv)
+        public static void ExportToPdf(DataGridView dgv, string titulo)
         {
             if (dgv.Rows.Count == 0)
             {
@@ -64,36 +75,90 @@ namespace SpaCitasSystem.Shared.Export
             SaveFileDialog sfd = new SaveFileDialog
             {
                 Filter = "PDF (*.pdf)|*.pdf",
-                FileName = "Export.pdf"
+                FileName = "Reporte.pdf"
             };
 
             if (sfd.ShowDialog() != DialogResult.OK) return;
 
             using (var writer = new PdfWriter(sfd.FileName))
             using (var pdf = new PdfDocument(writer))
-            using (var document = new iText.Layout.Document(pdf))
+            using (var document = new Document(pdf))
             {
-                Table table = new Table(dgv.Columns.Count);
+                document.SetMargins(20, 20, 20, 20);
 
-                foreach (DataGridViewColumn column in dgv.Columns)
+                var imageData = ImageDataFactory.Create(
+                    SpaCitasSystem.WinForms.Properties.Resources.Logo
+                );
+
+                var image = new iText.Layout.Element.Image(imageData)
+                    .ScaleToFit(150, 150)
+                    .SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);
+
+                document.Add(image);
+                var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+
+                var tituloParrafo = new Paragraph(titulo)
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetFontSize(16)
+                    .SetFont(boldFont);
+
+                document.Add(tituloParrafo);
+                document.Add(new Paragraph("\n"));
+
+                var columnas = dgv.Columns
+                    .Cast<DataGridViewColumn>()
+                    .Where(c => c.Visible &&
+                                c.Name != "PacienteId" &&
+                                c.Name != "ServicioId" &&
+                                c.Name != "TerapeutaId")
+                    .ToList();
+
+                Table table = new Table(columnas.Count)
+                    .UseAllAvailableWidth();
+
+                foreach (var column in columnas)
                 {
-                    table.AddHeaderCell(column.HeaderText);
+                    var headerCell = new Cell()
+                        .Add(new Paragraph(column.HeaderText))
+                        .SetBackgroundColor(new DeviceRgb(144, 238, 144))
+                        .SetFont(boldFont)
+                        .SetTextAlignment(TextAlignment.CENTER);
+
+                    table.AddHeaderCell(headerCell);
                 }
 
-                // Rows
                 foreach (DataGridViewRow row in dgv.Rows)
                 {
                     if (row.IsNewRow) continue;
 
-                    foreach (DataGridViewCell cell in row.Cells)
+                    foreach (var column in columnas)
                     {
-                        table.AddCell(cell.Value?.ToString() ?? "");
+                        var cellValue = row.Cells[column.Name].Value;
+                        string value = "";
+
+                        if (cellValue != null)
+                        {
+                            if (column.Name == "Fecha" && cellValue is DateTime fecha)
+                            {
+                                value = fecha.ToString("dd/MM/yyyy");
+                            }
+                            else if (column.Name == "Hora" && cellValue is TimeSpan hora)
+                            {
+                                value = DateTime.Today.Add(hora).ToString("h:mm tt");
+                            }
+                            else
+                            {
+                                value = cellValue?.ToString() ?? "";
+                            }
+                        }
+                        table.AddCell(new Cell()
+                            .Add(new Paragraph(value))
+                            .SetTextAlignment(TextAlignment.CENTER));
                     }
                 }
 
                 document.Add(table);
             }
-
             MessageBox.Show("PDF exportado correctamente");
         }
     }

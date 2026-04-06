@@ -16,7 +16,6 @@ namespace SpaCitasSystem.Application.Services
             : base(repo, mapper)
         {
         }
-
         public override async Task AddAsync(PacienteDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Nombre))
@@ -34,7 +33,6 @@ namespace SpaCitasSystem.Application.Services
 
             await base.AddAsync(dto);
         }
-
         public override async Task UpdateAsync(PacienteDto dto)
         {
             var pacientes = await _repo.GetAllAsync();

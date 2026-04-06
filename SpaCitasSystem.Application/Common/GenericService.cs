@@ -9,7 +9,6 @@ namespace SpaCitasSystem.Application.Common
     {
         protected readonly IGenericRepository<TEntity> _repo;
         protected readonly IMapper _mapper;
-
         public GenericService(
             IGenericRepository<TEntity> repo,
             IMapper mapper)
@@ -17,13 +16,11 @@ namespace SpaCitasSystem.Application.Common
             _repo = repo;
             _mapper = mapper;
         }
-
         public virtual async Task<IEnumerable<TDto>> GetAllAsync()
         {
             var entities = await _repo.GetAllAsync();
             return _mapper.Map<IEnumerable<TDto>>(entities);
         }
-
         public virtual async Task<TDto> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
@@ -35,7 +32,6 @@ namespace SpaCitasSystem.Application.Common
             var entity = _mapper.Map<TEntity>(dto);
             await _repo.AddAsync(entity);
         }
-
         public virtual async Task UpdateAsync(TDto dto)
         {
             var idProperty = typeof(TDto).GetProperty("Id");
@@ -43,7 +39,7 @@ namespace SpaCitasSystem.Application.Common
             if (idProperty == null)
                 throw new Exception("El DTO no tiene propiedad Id");
 
-            var id = (int)idProperty.GetValue(dto);
+            var id = Convert.ToInt32(idProperty.GetValue(dto));
             var entity = await _repo.GetByIdAsync(id);
 
             if (entity == null)
@@ -52,7 +48,6 @@ namespace SpaCitasSystem.Application.Common
 
             await _repo.UpdateAsync(entity);
         }
-
         public virtual async Task DeleteAsync(int id)
         {
             await _repo.DeleteAsync(id);

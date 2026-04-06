@@ -14,7 +14,6 @@ public class TerapeutaService
         : base(repo, mapper)
     {
     }
-
     public override async Task AddAsync(TerapeutaDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Nombre))
@@ -35,7 +34,6 @@ public class TerapeutaService
 
         await base.AddAsync(dto);
     }
-
     public override async Task UpdateAsync(TerapeutaDto dto)
     {
         var terapeutas = await _repo.GetAllAsync();

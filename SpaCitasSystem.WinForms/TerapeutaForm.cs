@@ -8,7 +8,6 @@ namespace SpaCitasSystem.WinForms
     public partial class TerapeutaForm : Form
     {
         private readonly ITerapeutaService _service;
-
         public TerapeutaForm(ITerapeutaService service)
         {
             InitializeComponent();
@@ -119,7 +118,7 @@ namespace SpaCitasSystem.WinForms
                 MessageBox.Show(ex.Message);
             }
         }
-        private void dgvTerapeutas_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvTerapeutas_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (dgvTerapeutas.CurrentRow == null) return;
 
@@ -141,7 +140,7 @@ namespace SpaCitasSystem.WinForms
 
         private void btnExportPdf_Click(object sender, EventArgs e)
         {
-            ExportService.ExportToPdf(dgvTerapeutas);
+            ExportService.ExportToPdf(dgvTerapeutas, "Reporte de Terapeutas");
         }
 
         private async void btnLimpiar_Click(object sender, EventArgs e)
